@@ -1,18 +1,18 @@
 <h1 align="center">
-  <img src="https://github.com/xtuJSer/CoCoMusic/blob/master/build/icons/256x256.png?raw=true">
+  <img width="180" height="180" src="https://github.com/xtuJSer/CoCoMusic/blob/master/build/icons/256x256.png?raw=true">
   <br/>
   CoCoMusic
 </h1>
-<h3 align="center">a simple music player Built by vue and electron.</h3>
+<h3 align="center">Vue + Electron + <img src="http://mypic-10053031.cossh.myqcloud.com/-75720e06afe95850.jpg">  =  <img width="50" height="50" src="http://mypic-10053031.cossh.myqcloud.com/256x256.png"> </h3>
 <p align="center">
 <img src="https://img.shields.io/badge/build-passing-green.svg">
-<img src="https://img.shields.io/badge/release-v2.0.1-brightgreen.svg">
+<img src="https://img.shields.io/badge/release-v2.0.2-brightgreen.svg">
 <img src="https://img.shields.io/badge/license-LGPL-red.svg">
 <br/>
 <img src="http://orblzfbb0.bkt.clouddn.com/Ful4txdNVi1_457r9K8vpbLgZKVn?imageView2/1/w/200/h/200/interlace/1/q/75|imageslim">
 </p>
-
 # Contributor
+
   welcome pull request!
  - [fengT-T](https://github.com/fengT-T)
  - [Noah Gao](https://github.com/noahziheng)
@@ -21,16 +21,16 @@
 ## Linux
 ### AppImage
 ``` bash
-chmod +x cocomusic-2.0.1-x86_64.AppImage
-./cocomusic-2.0.1-x86_64.AppImage
-``` 
+chmod +x cocomusic-2.0.2-x86_64.AppImage
+./cocomusic-2.0.2-x86_64.AppImage
+```
 ### deb
 ```bash
-sudo dpkg -i cocomusic_2.0.1_amd64.deb
+sudo dpkg -i cocomusic_2.0.2_amd64.deb
 ```
 ### pacman
 ```bash
-sudo pacman -U cocomusic-2.0.1.pacman
+sudo pacman -U cocomusic-2.0.2.pacman
 ```
 
 # Build Setup
@@ -39,7 +39,10 @@ sudo pacman -U cocomusic-2.0.1.pacman
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:9080
+# rebuild native module
+./node_modules/.bin/electron-rebuild
+
+# develop
 npm run dev
 
 # build electron application for production

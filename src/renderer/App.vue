@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <f-header></f-header>
-    <div id="container">
+    <f-header v-if="!fullScreen"></f-header>
+    <div :class="{'container': !fullScreen}">
       <transition name="fade" mode="out-in">
         <keep-alive>
           <router-view></router-view>
@@ -13,11 +13,15 @@
 
 <script>
 import fHeader from '@/components/Header'
-
 export default {
   name: 'cocomusic',
   components: {
     fHeader
+  },
+  computed: {
+    fullScreen () {
+      return !!this.$route.meta.fullScreen
+    }
   },
   created () {
     this.$store.dispatch('initFavorite')
@@ -37,7 +41,7 @@ a:hover,a:active,a:visited,a:focus {
 #app {
   user-select: none;
 }
-#container {
+.container {
   margin: 70px 10px 0px 10px;
 }
 .fade-enter-active {
@@ -50,5 +54,21 @@ a:hover,a:active,a:visited,a:focus {
 }
 .fade-leave-active {
   transform: all .3s ease;
+}
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0); 
+}
+::-webkit-scrollbar-thumb {
+  background-color: #5764c6;
+  border-radius: 2px;
+}
+.header {
+  -webkit-app-region: drag
+}
+.header a,button,img,input {
+  -webkit-app-region: no-drag;
 }
 </style>

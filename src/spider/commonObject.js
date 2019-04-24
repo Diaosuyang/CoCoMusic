@@ -19,7 +19,7 @@ export class Music {
     this.type = type
     this.singerList = singerList
     // 这个是啥子，其实我也不知道，我只知道默认是96： 'C400'
-    this.fileName = {0: 'C400', 48: 'C200', 96: 'C400', 128: 'M500', 320: 'M800', 111: 'C4L0', 112: 'R400', 113: 'KC40'}[this.type] + songMediaMid + '.m4a'
+    this.fileName = { 0: 'C400', 48: 'C200', 96: 'C400', 128: 'M500', 320: 'M800', 111: 'C4L0', 112: 'R400', 113: 'KC40' }[this.type] + songMediaMid + '.m4a'
   }
 }
 
@@ -87,5 +87,33 @@ export class Lyric {
         trans: trans[transIndex].lyric
       }
     })
+  }
+}
+
+export class UserInfo {
+  constructor (cookieString) {
+    this.cookieString = cookieString
+    this.cookie = (function () {
+      var cookie = {}
+      cookieString.split('; ').forEach(item => {
+        item = item.split('=')
+        cookie[item[0]] = item[1]
+      })
+      return cookie
+    })()
+    this.g_tk = this._gtk()
+  }
+  _gtk () {
+    function e (e) {
+      for (var n = 5381, o = 0, t = e.length; t > o; ++o) {
+        n += (n << 5) + e.charCodeAt(o)
+      }
+      return 2147483647 & n
+    }
+    if (this.cookie) {
+      return e(this.cookie['p_skey'] || this.cookie['skey'])
+    } else {
+      return 0
+    }
   }
 }

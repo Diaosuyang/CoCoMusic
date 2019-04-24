@@ -10,13 +10,13 @@
         <div class="song-item-head" :class="{'is-play': currentPlay && music.songMid === currentPlay.songMid}">
 
           <div class="music-favorite" :class="{'hide-music-favorite': !isfocus(music.songMid)}">
-            <button class="btn btn-link" v-show="!isfocus(music.songMid)" @click="favorite(music)">
+            <button class="btn btn-link" v-show="!isfocus(music.songMid)" @click="favorite(music), toRemote(music.songMid, 1)">
               <img class="favorite" src="../assets/img/Favorite.svg" alt="">
             </button>
             <button class="btn btn-link"
               v-show="isfocus(music.songMid)"
               :disabled="currentPlay && music.songMid === currentPlay.songMid" 
-              @click="deleteFavorite(music.songMid)">
+              @click="deleteFavorite(music.songMid), toRemote(music.songMid, 2)">
               <img class="favorite" src="../assets/img/hasFavorite.svg" alt="">
             </button>          
           </div>
@@ -48,7 +48,7 @@
 
     <div class="music-location">
       <transition name="right-show" mode="out-in">
-        <input class="form-input input-sm" v-model="musicFilter" @keyup.enter="quickSearch" v-show="showSearch" type="text" placeholder="过滤">
+        <input class="form-input input-sm" v-model.lazy.trim="musicFilter" @keyup.enter="quickSearch" v-show="showSearch" type="text" placeholder="过滤">
       </transition>
       <button class="btn btn-link" @click="clickSearch">
         <i class="icon icon-search"></i>
@@ -60,8 +60,9 @@
   </div>
 </template>
 <script>
-import {mapGetters, mapState} from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import generateFavorite from './common/Favorite.js'
+import { DeleteFavoriteSong, AddFavoriteSong } from '../../spider/favorite'
 
 const favoriteMinix = generateFavorite('song')
 
@@ -87,7 +88,7 @@ export default {
     ...mapGetters([
       'currentPlay'
     ]),
-    ...mapGetters({song: 'currentPlay'}),
+    ...mapGetters({ song: 'currentPlay' }),
     ...mapState({
       playUrl: state => state.Player.playUrl,
       mode: state => state.Player.mode
@@ -96,11 +97,13 @@ export default {
       return this.$route.fullPath === this.playUrl
     },
     musicListFilter () {
-      return this.musicList.map(music => {
-        let reg = new RegExp(`${this.musicFilter.toLowerCase()}`)
-        const singerName = music.singerList.reduce((acc, singer) => acc + singer.singerName, '')
-        return reg.test([music.songName, singerName, music.album.albumName].join(' ').toLowerCase())
-      })
+      return this.musicFilter.startsWith('call:')
+        ? this.musicList
+        : this.musicList.map(music => {
+          let reg = new RegExp(`${this.musicFilter.toLowerCase()}`)
+          const singerName = music.singerList.reduce((acc, singer) => acc + singer.singerName, '')
+          return reg.test([music.songName, singerName, music.album.albumName].join(' ').toLowerCase())
+        })
     }
   },
   filters: {
@@ -109,20 +112,23 @@ export default {
     }
   },
   watch: {
+    /**
+     * 如果是播放当前路由的列表的的话,那就监视变化,变化了就给他替换为最新的列表
+     */
     'this.musicList' (value) {
       return this.isPlayList && this.$store.commit('setPlayerState', {
-        playList: [...this.musicList]
+        playList: JSON.parse(JSON.stringify(this.musicList))
       })
     }
   },
   methods: {
     focusPlay () {
       const id = `#music${this.currentPlay.songMid}`
-      document.querySelector(id).scrollIntoView({block: 'center', behavior: 'smooth'})
+      document.querySelector(id).scrollIntoView({ block: 'center', behavior: 'smooth' })
     },
     play (index) {
       this.$store.commit('setPlayerState', {
-        playList: [...this.musicList],
+        playList: JSON.parse(JSON.stringify(this.musicList)),
         playUrl: this.$route.fullPath
       })
       this.$store.dispatch('setPlay', index)
@@ -133,6 +139,27 @@ export default {
     },
     quickSearch () {
       this.musicFilter === 'miku' && (this.musicFilter = `miku|初音`)
+      this.musicFilter.startsWith('call:') && this.command()
+    },
+    command () {
+      const command = this.musicFilter.match(/^(call:)(\w+)$/)[2]
+      const { dispatch } = this.$store
+      let opera = ({
+        'download' () {
+          dispatch('download')
+        },
+        'D' () {
+          dispatch('download')
+        }
+      })[command]
+      opera && opera()
+    },
+    async toRemote (id, flag) {
+      if (flag === 2) {
+        DeleteFavoriteSong(id)
+      } else {
+        AddFavoriteSong(id)
+      }
     }
   }
 }

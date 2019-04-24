@@ -48,14 +48,13 @@
     </div>
 
     <router-link :to="{path: `/singer/${singer.singerMid}/music`, query: {name: singer.singerName}}"
-      v-for="(singer, index) in singerList"
-      :key="singer.singerMid">
+    v-for="(singer, index) in singerList"
+    :key="singer.singerMid">
       <singer-avatar
         :singer="singer"
         :showImage="page === 1 && index < 10">
       </singer-avatar>
     </router-link>
-
 
     <f-pagination
       :current="page"
@@ -68,8 +67,8 @@
 </template>
 <script>
 import singerAvatar from './SingerAvatar'
-import {tag} from './common/SingerList.js'
-import {getNewSingerList} from '../../spider'
+import { tag } from './common/SingerList.js'
+import { getNewSingerList } from '../../spider'
 import fPagination from './Pagination'
 
 export default {
@@ -102,7 +101,9 @@ export default {
     }
   },
   created () {
-    this.getTheSingeList(1)
+    setTimeout(async () => {
+      this.getTheSingeList(1)
+    }, 50)
   }
 }
 </script>

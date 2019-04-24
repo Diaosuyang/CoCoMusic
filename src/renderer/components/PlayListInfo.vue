@@ -4,8 +4,8 @@
       <img :src="playList.imgUrl" alt="">
       <div class="playList-info-name">
         <h4>{{playList.playListName}}</h4>
-          <button class="btn btn-sm" v-show="!isfocus()" @click="favorite()">关注</button>
-          <button class="btn btn-sm" v-show="isfocus()" @click="deleteFavorite()">取消关注</button>
+          <button class="btn btn-sm" v-show="!isfocus()" @click="favorite(), toRemote(1)">关注</button>
+          <button class="btn btn-sm" v-show="isfocus()" @click="deleteFavorite(), toRemote(2)">取消关注</button>
       </div>
     </div>
     <div class="divider text-center"></div>
@@ -14,8 +14,9 @@
   </div>
 </template>
 <script>
-import {getPlayListInfo} from '../../spider/index.js'
-import {PlayList} from '../../spider/commonObject.js'
+import { getPlayListInfo } from '../../spider/index.js'
+import { PlayList } from '../../spider/commonObject.js'
+import { FavoritePlayList } from '../../spider/favorite'
 import songList from './SongList'
 import generateFavorite from './common/Favorite.js'
 
@@ -35,9 +36,12 @@ export default {
   methods: {
     async getThePlayListInfo () {
       Object.assign(this, this.$options.data.call(this))
-      let {playListName, list} = (await getPlayListInfo(this.playListMid))
+      let { playListName, list } = (await getPlayListInfo(this.playListMid))
       this.playList = new PlayList(this.playListMid, playListName, this.imgUrl)
       this.list = list
+    },
+    async toRemote (flag) {
+      FavoritePlayList(this.playListMid, flag)
     }
   },
   async activated () {

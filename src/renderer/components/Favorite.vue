@@ -16,23 +16,29 @@
 </template>
 <script>
 import fTab from '@/components/Tab'
-
+import { RemoteToLocal } from '../../spider/favorite'
 export default {
   name: 'favorite',
   data () {
     return {
       tabList: [
-        {name: 'Favorite', ZHName: '单曲'},
-        {name: 'FavoriteAlbum', ZHName: '专辑'},
-        {name: 'FavoriteSinger', ZHName: '歌手'},
-        {name: 'FavoritePlayList', ZHName: '歌单'}
+        { name: 'Favorite', ZHName: '单曲' },
+        { name: 'FavoriteAlbum', ZHName: '专辑' },
+        { name: 'FavoriteSinger', ZHName: '歌手' },
+        { name: 'FavoritePlayList', ZHName: '歌单' }
       ]
     }
+  },
+  methods: {
+    RemoteToLocal: RemoteToLocal
   },
   components: {
     fTab
   },
   computed: {
+  },
+  activated () {
+    setTimeout(() => RemoteToLocal(), 2000)
   }
 }
 </script>

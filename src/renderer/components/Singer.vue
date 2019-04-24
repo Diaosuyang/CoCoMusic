@@ -4,8 +4,8 @@
       <singer-avatar :singer="singer" :showName='false'></singer-avatar>
       <div class="singer-name">
         <h4>{{singer.singerName}}</h4>
-        <button class="btn btn-sm" v-show="!isfocus()" @click="favorite()">关注</button>
-        <button class="btn btn-sm" v-show="isfocus()" @click="deleteFavorite()">取消关注</button>
+        <button class="btn btn-sm" v-show="!isfocus()" @click="favorite(), toRemote(1)">关注</button>
+        <button class="btn btn-sm" v-show="isfocus()" @click="deleteFavorite(), toRemote(0)">取消关注</button>
       </div>
     </div>
     <div class="music-album-mv">
@@ -25,7 +25,8 @@
   </div>
 </template>
 <script>
-import {Singer} from '../../spider/commonObject.js'
+import { Singer } from '../../spider/commonObject.js'
+import { DeleteSinger, AddSinger } from '../../spider/favorite'
 import fTab from '@/components/Tab'
 import singerAvatar from './SingerAvatar'
 import generateFavorite from './common/Favorite.js'
@@ -49,9 +50,9 @@ export default {
       let id = this.singer.singerMid
       let name = this.singer.singerName
       return [
-        {path: `/singer/${id}/music`, name: 'SingerMusic', ZHName: '单曲', params: {id}, query: {name}},
-        {path: `/singer/${id}/album`, name: 'SingerAlbum', ZHName: '专辑', params: {id}, query: {name}},
-        {path: `/singer/${id}/mv`, name: 'SingerMv', ZHName: 'MV', params: {id}, query: {name}}
+        { path: `/singer/${id}/music`, name: 'SingerMusic', ZHName: '单曲', params: { id }, query: { name } },
+        { path: `/singer/${id}/album`, name: 'SingerAlbum', ZHName: '专辑', params: { id }, query: { name } },
+        { path: `/singer/${id}/mv`, name: 'SingerMv', ZHName: 'MV', params: { id }, query: { name } }
       ]
     }
   },
@@ -64,6 +65,15 @@ export default {
   },
   components: {
     singerAvatar, fTab
+  },
+  methods: {
+    toRemote (flag) {
+      if (flag === 0) {
+        DeleteSinger(this.singer.singerMid)
+      } else {
+        AddSinger(this.singer.singerMid)
+      }
+    }
   }
 }
 </script>

@@ -39,7 +39,7 @@
   </div>
 </template>
 <script>
-import {getCategory, getPlayList} from '../../spider/index.js'
+import { getCategory, getPlayList } from '../../spider/index.js'
 import fPagination from './Pagination'
 import fPlayList from './PlayListList'
 
@@ -77,8 +77,11 @@ export default {
   async created () {
     this.loading = true
     this.categoryGroupList = (await getCategory())
+    // this.currentCategory = 10000000
     this.currentCategory = this.categoryGroupList[0].categoryList[0].categoryId
-    this.getThePlayList(1)
+    // 在上一个请求完成之后放到事件循环后面 则只需要 400ms 就能完成属于正常速度, 我怀疑 electron 那群人做了什么蠢事把事件循环搞坏了
+    setTimeout(() => this.getThePlayList(1), 0)
+    // await this.getThePlayList(1) // 在上一个请求完成之后立即执行 一般在 6000ms 左右, 有毒
   }
 }
 </script>
@@ -111,8 +114,9 @@ div.loading{
   display: none;
 }
 .playList-list {
-  width: 850px;
+  padding-left: 130px;
   float: right;
+  margin: 0px 10px;
   /* height: 530px;
   scroll-behavior: smooth;
   overflow: scroll; */

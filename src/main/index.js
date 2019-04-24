@@ -1,7 +1,10 @@
 'use strict'
-
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import flow from 'lodash/fp/flow'
+import appIcon from './tray'
+import localStorage from './localStorage'
+const hotKey = require('./hotKey')
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -24,29 +27,34 @@ function createWindow () {
   /**
    * Initial window options
    */
+  var isSide = localStorage.getItem('winSideSetting') === 'true'
   mainWindow = new BrowserWindow({
-    height: 630, // 尤其是 有着1T 显存的 gt630 战术核显卡，只要一发就能摧毁一个航母战斗群。
+    minHeight: 715, // 尤其是 有着1T 显存的 gt630 战术核显卡，只要一发就能摧毁一个航母战斗群。
+    height: 715,
     useContentSize: true,
-    width: 1020,
+    minWidth: 1195,
+    width: 1195,
     autoHideMenuBar: false,
-    titleBarStyle: 'hidden',
     show: false,
-    // frame: false,
-    resizable: false,
-    icon: '../../build/icons/256x256.png'
+    resizable: true,
+    icon: '../../build/icons/256x256.png',
+    darkTheme: true,
+    frame: isSide
   })
-
   mainWindow.loadURL(winURL)
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
+  mainWindow.on('close', (e) => {
+    if (localStorage.getItem('hideSetting') === 'true') {
+      e.preventDefault()
+      mainWindow.hide()
+    }
   })
   mainWindow.webContents.on('did-finish-load', () => {
     mainWindow.show()
     loadingWindow && loadingWindow.close()
   })
 }
-
+// 启动应用窗口设计
 function creatLoading () {
   loadingWindow = new BrowserWindow({
     center: true,
@@ -63,30 +71,54 @@ function creatLoading () {
   // loadingWindow.webContents.on('did-finish-load', () => loadingWindow.show())
 }
 
-const isSecondInstance = app.makeSingleInstance((commandLine, workingDirectory) => {
-  // Someone tried to run a second instance, we should focus our window.
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) mainWindow.restore()
-    mainWindow.focus()
-  }
-})
+const gotTheLock = app.requestSingleInstanceLock()
 
-if (isSecondInstance) {
+if (!gotTheLock) {
   app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+  })
 }
 
 app.on('ready', flow([createWindow, creatLoading]))
+hotKey.default()
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+  if (appIcon) {
+    appIcon.destroy()
   }
+  // if (process.platform !== 'darwin') {
+  app.quit()
+  // }
 })
 
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
   }
+})
+
+ipcMain.on('reload', (e) => {
+  app.relaunch()
+  app.exit(0)
+})
+
+ipcMain.on('clearAllKey', (e) => {
+  hotKey.clearGlobalKey()
+})
+
+ipcMain.on('try add global key', (e, type, keys) => {
+  let status = hotKey.setGlobalKey(type, keys)
+  mainWindow.webContents.send('add key status', status, type)
+})
+
+ipcMain.on('default key setting', (e) => {
+  hotKey.DefaultKeySetting()
 })
 
 /**
@@ -97,7 +129,7 @@ app.on('activate', () => {
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
  */
 
-/*
+/**
 import { autoUpdater } from 'electron-updater'
 
 autoUpdater.on('update-downloaded', () => {
@@ -107,4 +139,4 @@ autoUpdater.on('update-downloaded', () => {
 app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
- */
+*/
