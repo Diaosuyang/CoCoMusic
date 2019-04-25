@@ -29,6 +29,7 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
+    "remoteBuild": false,
     "productName": "CocoMusic",
     "appId": "xyz.xn--zq2aw6m.cocomusic",
     "directories": {
